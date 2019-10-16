@@ -18,6 +18,19 @@
         <property name="prefix" value="/WEB-INF/pages/"/>
         <property name="suffix" value=".jsp"/>
     </bean>
+
+    <!-- 配置的类型转换器工厂 -->
+    <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <!-- 诸如我们自定义的类型转换器 -->
+                <bean class="com.ajacker.util.StringToDateConverter"/>
+            </set>
+        </property>
+    </bean>
+
     <!--mvc注解支持-->
     <mvc:annotation-driven/>
+    <!--不拦截静态资源-->
+    <mvc:default-servlet-handler/>
 </beans>
