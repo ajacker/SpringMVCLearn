@@ -19,6 +19,12 @@
         <property name="suffix" value=".jsp"/>
     </bean>
 
+    <!--配置文件解析器对象-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+
+    </bean>
+
+
     <!-- 配置的类型转换器工厂 -->
     <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
         <property name="converters">

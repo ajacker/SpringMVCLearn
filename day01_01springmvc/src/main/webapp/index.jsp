@@ -35,12 +35,27 @@
 </script>
 <body>
     <h3>入门程序</h3>
-    <a href="/account/hello">入门程序</a>
+    <a href="account/hello">入门程序</a>
     <form action="account/updateAccount" method="post">
         <label>名称</label><input type="text" name="username"><br/>
         <label>年龄</label><input type="text" name="age"><br/>
         <input type="submit" value="保存">
     </form>
     <button id="btn">发送请求</button>
+    <h3>普通文件上传</h3>
+    <form action="fileUpload/uploadHandler" method="post" enctype="multipart/form-data">
+        选择文件<input type="file" name="fileParam"/><br/>
+        <input type="submit" value="上传文件"/>
+    </form>
+    <h3>mvc文件上传</h3>
+    <form action="fileUpload/mvcUploadHandler" method="post" enctype="multipart/form-data">
+        选择文件<input type="file" name="fileParam"/><br/>
+        <input type="submit" value="上传文件"/>
+    </form>
+    <h3>跨服务器文件上传</h3>
+    <form action="fileUpload/betweenUploadHandler" method="post" enctype="multipart/form-data">
+        选择文件<input type="file" name="fileParam"/><br/>
+        <input type="submit" value="上传文件"/>
+    </form>
 </body>
 </html>

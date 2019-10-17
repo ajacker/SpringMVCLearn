@@ -804,3 +804,150 @@ public Account testAjax(@RequestBody Account account) {
 ​	
 
 ## 第五章：文件上传
+
+### 1. 文件上传的原理
+
+- 实现文件上传的前提
+  - `<form>`表单的`enctype`属性取值必须是`multipart/form-data`(默认值是`application/x-www-form-urlencoded`),表示表单内容是分块的.这时`request`对象的`getParameter()`方法将失效.
+
+  - `<form>`表单的`method`属性取值必须是post,因为get请求长度有限制.
+
+  - 提供一个`<input/>`标签,用来选择上传文件.
+
+  ```jsp
+  <form action="/fileUpload/uploadHandler" method="post" enctype="multipart/form-data">
+      选择文件<input type="file" name="fileParam"/><br/>
+      <input type="submit" value="上传文件"/>
+  </form>
+  ```
+
+  -  引用文件上传的相关jar包 
+
+    ```xml
+    <dependency>
+        <groupId>commons-fileupload</groupId>
+        <artifactId>commons-fileupload</artifactId>
+        <version>1.3.1</version>
+    </dependency>
+    <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.4</version>
+    </dependency>
+    ```
+
+- 文件表单内容
+
+  因为我们设置了`enctype`属性取值为`multipart/form-data`,因此在请求参数头中会有一项`Content-Type:multipart/form-data; boundary=----WebKitFormBoundaryOMtUEa1sSZ3ayCfC`,表示当前表单内容数据是分块的,每两块之间以`----WebKitFormBoundaryOMtUEa1sSZ3ayCfC`分界.
+
+  服务器通过遍历每一块数据,找到文件所在的数据块并执行保存.
+
+### 2. 文件上传的三种实现
+
+#### 1. 使用JavaEE进行文件上传
+
+传统的JavaEE文件上传思路是通过解析`request`对象,获取表单中的上传文件项并执行保存.
+
+```java
+@RequestMapping("/uploadHandler")
+public String handleUpload(HttpServletRequest request) throws Exception {
+    System.out.println("文件上传");
+    //
+    String path = request.getSession().getServletContext().getRealPath("/uploads");
+    //判断路径不存在就创建
+    File file = new File(path);
+    if (!file.exists()){
+        file.mkdirs();
+    }
+    //解析request对象，获取上传文件项
+    DiskFileItemFactory factory = new DiskFileItemFactory();
+    ServletFileUpload upload = new ServletFileUpload(factory);
+    //解析request
+    List<FileItem> fileItems = upload.parseRequest(request);
+    //遍历创建文件
+    fileItems.removeIf(FileItem::isFormField);
+    for (FileItem fileItem : fileItems) {
+        String fileName = fileItem.getName();
+        //文件名称设置唯一值
+        String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+        fileName = uuid+"_"+fileName;
+        fileItem.write(new File(path, fileName));
+        //删除临时文件
+        fileItem.delete();
+    }
+    return "success";
+}
+```
+
+#### 2. 使用SpringMVC进行单服务器文件上传
+
+- 在`springmvc.xml`配置文件解析器对象(必须叫这个id)
+
+  ```xml
+  <!--配置文件解析器对象-->
+  <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+  </bean>
+  ```
+
+- 编写控制器中的相关代码
+
+  ```java
+  @RequestMapping("/mvcUploadHandler")
+  public String mvcHandleUpload(HttpServletRequest request,@RequestParam("fileParam") MultipartFile upload) throws Exception {
+      System.out.println("文件上传");
+      //
+      String path = request.getSession().getServletContext().getRealPath("/uploads");
+      //判断路径不存在就创建
+      File file = new File(path);
+      if (!file.exists()){
+          file.mkdirs();
+      }
+      String fileName = upload.getOriginalFilename();
+      //文件名称设置唯一值
+      String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+      fileName = uuid+"_"+fileName;
+      upload.transferTo(new File(path, fileName));
+      return "success";
+  }
+  ```
+
+#### 3. 使用SpringMVC进行跨服务器文件上传
+
+- 导入库进行服务器通信
+
+  ```xml
+  <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-core</artifactId>
+      <version>1.18.1</version>
+  </dependency>
+  <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-client</artifactId>
+      <version>1.18.1</version>
+  </dependency>
+  ```
+
+- 编写控制器中的相关代码
+
+  ```java
+  @RequestMapping("/betweenUploadHandler")
+  public String betweenHandleUpload(@RequestParam("fileParam") MultipartFile upload) throws Exception {
+      //文件上传服务器包
+      String path = "http://127.0.0.1:9090/uploads/";
+      String fileName = upload.getOriginalFilename();
+      //文件名称设置唯一值
+      String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+      fileName = uuid+"_"+fileName;
+      //创建客户端
+      Client client = Client.create();
+      //连接图片服务器
+      WebResource resource = client.resource(path + fileName);
+      //上传文件
+      resource.put(upload.getBytes());
+      return "success";   
+  }
+  ```
+
+  
+
