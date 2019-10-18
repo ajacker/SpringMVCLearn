@@ -1100,3 +1100,87 @@ public class SessionController {
 
 - 注解在类上，指名哪些属性在存到request域的同时存放到Session域
 
+## 第七章：异常处理
+
+异常处理可以让我们在出现异常的时候给用户展现自定义的页面
+
+1. 合适的抛出异常
+
+   ```java
+   @Controller
+   @RequestMapping("/error")
+   public class ErrorController {
+       @RequestMapping("/testException")
+       public String testException() throws SysException {
+           System.out.println("testException"+"执行了");
+           try {
+               int i = 1/0;
+           } catch (Exception e) {
+               e.printStackTrace();
+               throw new SysException("出现系统异常");
+           }
+           return "success";
+       }
+   }
+   ```
+
+2. 编写自定义异常类(也可以用自带的异常)
+
+   ```java
+   /**
+    * @author ajacker
+    * @date 2019/10/18 13:40
+    */
+   public class SysException extends Exception {
+       private String message;
+       public SysException(String message) {
+           this.message = message;
+       }
+       @Override
+       public String getMessage() {
+           return message;
+       }
+       public void setMessage(String message) {
+           this.message = message;
+       }
+   }
+   
+   ```
+
+3. 编写异常处理器(要求实现接口` HandlerExceptionResolver`)
+
+   ```java
+   /**
+    * @author ajacker
+    * @date 2019/10/18 13:43
+    * 异常处理器
+    */
+   public class SysExceptionResolver implements HandlerExceptionResolver {
+       @Override
+       public ModelAndView resolveException(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e) {
+           SysException ex = null;
+           if (e instanceof SysException){
+               ex = (SysException) e;
+           }else {
+               ex = new SysException("出现其它异常");
+           }
+           //创建ModelAndView
+           ModelAndView mv = new ModelAndView();
+           mv.addObject("errorMsg", ex.getMessage());
+           mv.setViewName("error");
+           return mv;
+       }
+   }
+   ```
+
+4. 在`springmvc.xml`中配置bean
+
+   ```xml
+   <!--配置异常处理器-->
+   <bean id="sysExceptionResolver" class="com.ajacker.exception.SysExceptionResolver"/>
+   ```
+
+   
+
+
+

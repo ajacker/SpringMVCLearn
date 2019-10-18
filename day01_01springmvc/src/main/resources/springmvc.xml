@@ -24,6 +24,11 @@
 
     </bean>
 
+    <!--配置异常处理器-->
+    <bean id="sysExceptionResolver" class="com.ajacker.exception.SysExceptionResolver">
+
+    </bean>
+
 
     <!-- 配置的类型转换器工厂 -->
     <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
