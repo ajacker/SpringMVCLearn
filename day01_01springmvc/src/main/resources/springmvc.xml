@@ -29,6 +29,21 @@
 
     </bean>
 
+    <!--配置拦截器-->
+    <mvc:interceptors>
+        <!--第一个拦截器-->
+        <mvc:interceptor>
+            <!--要拦截的方法-->
+            <mvc:mapping path="/interrupt/*"/>
+            <bean id="interceptor1" class="com.ajacker.interceptor.MyInterceptor1"/>
+        </mvc:interceptor>
+        <!--第二个拦截器-->
+        <mvc:interceptor>
+            <!--要拦截的方法-->
+            <mvc:mapping path="/interrupt/*"/>
+            <bean id="interceptor2" class="com.ajacker.interceptor.MyInterceptor2"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
 
     <!-- 配置的类型转换器工厂 -->
     <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">

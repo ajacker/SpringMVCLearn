@@ -1180,7 +1180,104 @@ public class SessionController {
    <bean id="sysExceptionResolver" class="com.ajacker.exception.SysExceptionResolver"/>
    ```
 
-   
+## 第八章：拦截器
 
+### 1. 拦截器概念
 
+ Spring MVC中的拦截器（Interceptor）类似于Servlet中的过滤器（Filter），它主要用于拦截用户请求并作相应的处理。例如通过拦截器可以进行权限验证、记录请求信息的日志、判断用户是否登录等。
+要使用Spring MVC中的拦截器，就需要对拦截器类进行定义和配置。通常拦截器类可以通过两种方式来定义。 
+
+-  通过`HandlerInterceptor`接口，或继承`HandlerInterceptor`接口的实现类（如`HandlerInterceptorAdapter`）来定义。 
+-  通过实现`WebRequestInterceptor`接口，或继承`WebRequestInterceptor`接口的实现类来定义。 
+
+### 2. 编写拦截器
+
+我们这里通过继承`HandlerInterceptor`接口来实现一个拦截器
+
+```java
+public class MyInterceptor1 implements HandlerInterceptor {
+    /**
+     * 预处理，controller方法执行前
+     * @param request
+     * @param response 可以用于跳转页面
+     * @param handler
+     * @return 是否放行
+     * @throws Exception
+     */
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        System.out.println("preHandle执行了......1");
+        return true;
+    }
+
+    /**
+     * 后处理方法，controller方法执行后，页面跳转之前
+     * @param request
+     * @param response
+     * @param handler
+     * @param modelAndView
+     * @throws Exception
+     */
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        System.out.println("postHandle执行了......1");
+    }
+
+    /**
+     * 页面渲染完成后，执行
+     * @param request
+     * @param response
+     * @param handler
+     * @param ex
+     * @throws Exception
+     */
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        System.out.println("afterCompletion执行了......1");
+    }
+}
+```
+
+### 3. 配置拦截器 
+
+我们需要在`springmvc.xml`文件中配置拦截器和指定要拦截的方法才能使它生效，下面是一个配置两个拦截器的例子，会对映射到`/interrupt/`下的所有方法拦截
+
+```xml
+<!--配置拦截器-->
+<mvc:interceptors>
+    <!--第一个拦截器-->
+    <mvc:interceptor>
+        <!--要拦截的方法-->
+        <mvc:mapping path="/interrupt/*"/>
+        <bean id="interceptor1" class="com.ajacker.interceptor.MyInterceptor1"/>
+    </mvc:interceptor>
+    <!--第二个拦截器-->
+    <mvc:interceptor>
+        <!--要拦截的方法-->
+        <mvc:mapping path="/interrupt/*"/>
+        <bean id="interceptor2" class="com.ajacker.interceptor.MyInterceptor2"/>
+    </mvc:interceptor>
+</mvc:interceptors>
+```
+
+### 4. 拦截器的执行顺序
+
+- `preHandle()`：在控制器方法（被拦截方法）执行之前执行，返回`true`代表放行，执行下一步
+- `postHandle()`： 在控制器方法（被拦截方法）执行之后，视图解析器渲染之前执行
+- `afterCompletion()`：  在控制器方法（被拦截方法）执行之后，视图解析器渲染完成之后执行
+
+ ![img](SpringMVC笔记.assets/1240732-20171114200511874-738520900.png) 
+
+这是一个输出的实例：
+
+```java
+preHandle执行了......1
+preHandle执行了......2
+控制器中的方法执行了
+postHandle执行了......2
+postHandle执行了......1
+页面跳转了
+afterCompletion执行了......2
+afterCompletion执行了......1
+```
 

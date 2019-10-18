@@ -16,5 +16,6 @@
     password = ${password}
     age = ${age}
     sessionScope = ${sessionScope}
+    <% System.out.println("页面跳转了"); %>
 </body>
 </html>

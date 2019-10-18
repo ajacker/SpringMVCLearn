@@ -63,5 +63,6 @@
     <a href="session/testGet">取出 SessionAttribute</a>
     <hr/>
     <a href="session/testClean">清除 SessionAttribute</a>
+    <a href="interrupt/testInterrupter">拦截器</a>
 </body>
 </html>
