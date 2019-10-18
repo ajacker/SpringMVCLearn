@@ -8,6 +8,14 @@ public class User {
     private String name;
     private String id;
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "name='" + name + '\'' +
+                ", id='" + id + '\'' +
+                '}';
+    }
+
     public User() {
     }
 

@@ -285,7 +285,7 @@ public class HelloController {
 
 访问地址` http://localhost:8080/findAccount/55 `后，得到输出`accountId:55`
 
-### 3. 请求参数的绑定（@RequestParam）
+### 3. 请求参数的绑定（`@RequestParam`）
 
 **参数绑定的示例**
 
@@ -949,5 +949,154 @@ public String handleUpload(HttpServletRequest request) throws Exception {
   }
   ```
 
-  
+## 第六章：注解介绍
+
+### 1. `@RequestBody`
+
+```java
+@RequestMapping("/testRequestBody")
+public String testRequestBody(@RequestBody String body){
+    System.out.println("执行了...");
+    System.out.println(body);
+    return "success";
+}
+```
+
+- 对于get请求，请求体是一个类似于` username=abc&age=12 `的字符串，
+- 对于post请求，如果有相关的包，可以把json自动封装成实体类
+
+### 2. `@RequestHeader`
+
+```java
+@RequestMapping("/testRequestHeader")
+public String testRequestHeader(@RequestHeader("Accept") String header){
+    System.out.println("执行了...");
+    System.out.println(header);
+    return "success";
+}
+```
+
+- `value`:指定要获取的请求头字段
+
+### 3. `@CookieValue`
+
+```java
+@RequestMapping("/testCookie")
+public String testCookie(@CookieValue("JSESSIONID") String cookie){
+    System.out.println("执行了...");
+    System.out.println(cookie);
+    return "success";
+}
+```
+
+-  `value`:指定cookie的名称
+
+### 4. `@ModelAttribute`
+
+1. 单独使用且返回值为void
+
+   ```java
+   @ModelAttribute
+   public void searchUser(Map<String,Object> map,@RequestParam("name") String name){
+       User user = new User();
+       user.setName(name);
+       user.setId("xxx");
+       map.put("user1", user);
+   }
+   ```
+
+   - 可以借助map和model将数据模型放入request域
+   - 先于`@RequestMapping`修饰的方法执行
+
+2. 单独使用且返回POJO但未指定属性
+
+   ```java
+   @ModelAttribute
+   public User searchUser(@RequestParam("name") String name){
+       User user = new User();
+       user.setName(name);
+       user.setId("xxx");
+       return user;
+   }
+   ```
+
+   - 以类型名首字符小写为`key`（如`"user"`），返回值为`value`放入request域
+   - 先于`@RequestMapping`修饰的方法执行
+
+3. 单独使用返回POJO且指定了属性
+
+   ```java
+   @ModelAttribute("user2")
+   public User searchUser(@RequestParam("name") String name){
+       User user = new User();
+       user.setName(name);
+       user.setId("xxx");
+       return user;
+   }
+   ```
+
+   - 以`value`属性为`key`（如`"user2"`），返回值为`value`放入request域
+   - 先于`@RequestMapping`修饰的方法执行
+
+4. 和`@RequestMapping`同时使用
+
+   ```java
+   @ModelAttribute("user")
+   @RequestMapping("/testModelAttribute")
+   public User testModelAttribute(String name){
+       User user = new User();
+       user.setName(name);
+       user.setId("xxx");
+       return user;
+   }
+   ```
+
+   - 以`value`属性为`key`（如`"user"`），返回值为`value`放入request域
+   - 返回的视图为请求路径的对应视图（例如这个就是`"/WEB-INF/pages/testModelAttribute.jsp"`）
+   - 不会先于其它方法执行
+
+   - 这样修饰的方法不能使用`@RequestParam`注解，不知道为什么会报错
+
+5. 注解在参数上
+
+   ```java
+   @RequestMapping("/testModelAttribute2")
+   public User testModelAttribute2(@ModelAttribute("result") User user){
+       System.out.println(user);
+       return "hello";
+   }
+   ```
+
+   - 从model中以`value`属性为key，取出value赋值给user
+
+### 5. `@SessionAttribute`
+
+```java
+@Controller
+@RequestMapping("session")
+@SessionAttributes({"username","password","age"})
+public class SessionController {
+    @RequestMapping("/testPut")
+    public String testPut(Model model){
+        model.addAttribute("username", "泰斯特");
+        model.addAttribute("password","123456");
+        model.addAttribute("age", 31);
+        //跳转之前将数据保存到 username、password 和 age 中，因为注解@SessionAttribute 中有 这几个参数
+        return "success";}
+
+    @RequestMapping("/testGet")
+    public String testGet(ModelMap model){
+        System.out.println(model.get("username")+";"+model.get("password")+";"+model.get("age"));
+        return "success";
+    }
+
+    @RequestMapping("/testClean")
+    public String complete(SessionStatus sessionStatus){
+        sessionStatus.setComplete();
+        return "success";
+    }
+}
+```
+
+- 注解在类上，指名哪些属性在存到request域的同时存放到Session域
 

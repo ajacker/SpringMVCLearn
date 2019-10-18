@@ -57,5 +57,11 @@
         选择文件<input type="file" name="fileParam"/><br/>
         <input type="submit" value="上传文件"/>
     </form>
+    <!-- SessionAttribute 注解的使用 -->
+    <a href="session/testPut">存入 SessionAttribute</a>
+    <hr/>
+    <a href="session/testGet">取出 SessionAttribute</a>
+    <hr/>
+    <a href="session/testClean">清除 SessionAttribute</a>
 </body>
 </html>

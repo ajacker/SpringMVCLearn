@@ -1,11 +1,9 @@
 package com.ajacker.controller;
 
 import com.ajacker.domain.Account;
+import com.ajacker.domain.User;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -54,5 +52,59 @@ public class HelloController {
 
         // 将user对象返回给前端页面
         return account;
+    }
+
+    @RequestMapping("/testRequestBody")
+    public String testRequestBody(@RequestBody String body) {
+        System.out.println("执行了...");
+        System.out.println(body);
+        return "success";
+    }
+
+    @RequestMapping("/testRequestHeader")
+    public String testRequestHeader(@RequestHeader("Accept") String header) {
+        System.out.println("执行了...");
+        System.out.println(header);
+        return "success";
+    }
+
+    @RequestMapping("/testCookie")
+    public String testCookie(@CookieValue("JSESSIONID") String cookie) {
+        System.out.println("执行了...");
+        System.out.println(cookie);
+        return "success";
+    }
+//    @ModelAttribute
+//    public void searchUser(Map<String,Object> map,@RequestParam("name") String name){
+//        User user = new User();
+//        user.setName(name);
+//        user.setId("xxx");
+//        System.out.println(user);
+//        map.put("user1", user);
+//    }
+
+//    @ModelAttribute
+//    public User searchUser(@RequestParam("name") String name){
+//        User user = new User();
+//        user.setName(name);
+//        user.setId("xxx");
+//        System.out.println(user);
+//        return user;
+//    }
+
+    @ModelAttribute("result")
+    @RequestMapping("/testModelAttribute")
+    public User testModelAttribute(String name) {
+        User user = new User();
+        user.setName(name);
+        user.setId("xxx");
+        System.out.println(user);
+        return user;
+    }
+
+    @RequestMapping("/testModelAttribute2")
+    public User testModelAttribute2(@ModelAttribute("result") User user) {
+        System.out.println(user);
+        return user;
     }
 }
